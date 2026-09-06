@@ -1,0 +1,36 @@
+# Keil build output
+OBJ/
+Listings/
+*.lst
+*.o
+*.d
+*.crf
+*.htm
+*.lnp
+*.sct
+*.dep
+*.axf
+*.hex
+*.bin
+*.map
+*.htm
+
+# Keil user-specific
+*.uvguix.*
+*.uvoptx
+
+# Debug config
+DebugConfig/
+
+# IDE files
+.vscode/
+.claude/
+
+# IDE logs and temp
+*.log
+*.log.lock
+
+# System files
+*.scvd
+JLinkSettings.ini
+keilkilll.bat
