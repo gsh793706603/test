@@ -8,6 +8,7 @@
 #include "oled.h"
 #include "adc.h"
 #include "motor.h"
+#include "protocol.h"
 
 int time = 0;
 int Distance = 0;
@@ -53,7 +54,10 @@ uint8_t string[10] = {0};
 		OLED_ShowString(12,3,string,16);
 
 		//OLED ��ʾ��ǰģʽ
-		sprintf((char *)string,"Mode:%d   ",Mode);
+		if(Mode == 5)
+			sprintf((char *)string,"Mode:RPi  ");
+		else
+			sprintf((char *)string,"Mode:%d   ",Mode);
 		OLED_ShowString(12,6,string,16);
 
 		UsartPrintf(USART3,"Mode:%d",Mode);
@@ -66,23 +70,48 @@ uint8_t string[10] = {0};
 			Stop();
 		}
 
-		//Mode 1: 超声波跟随 (>20cm前进, <15cm后退, 读一次距离避免重复阻塞)
+		//Mode 1: 增强跟随 (超声波 + 红外避障)
 		if(Mode == 1)
 		{
-			int dist = SR04_Distance();
-			if(dist > 20)
-			{
-				Forward();
-				delay_ms(50);
-			}
-			else if(dist < 15)
+			// 红外紧急避障优先
+			if(IR_LEFT == 1 && IR_RIGHT == 1)
 			{
 				Backward();
-				delay_ms(50);
+				delay_ms(300);
+			}
+			else if(IR_LEFT == 1)
+			{
+				RotateCW();		//左边有障碍, 右转
+				delay_ms(200);
+			}
+			else if(IR_RIGHT == 1)
+			{
+				RotateCCW();	//右边有障碍, 左转
+				delay_ms(200);
 			}
 			else
 			{
-				Stop();
+				// 超声波跟随
+				int dist = SR04_Distance();
+				if(dist > 30)
+				{
+					Forward();
+					delay_ms(50);
+				}
+				else if(dist > 15)
+				{
+					Forward();
+					delay_ms(30);	//慢速靠近
+				}
+				else if(dist < 10)
+				{
+					Backward();
+					delay_ms(50);
+				}
+				else
+				{
+					Stop();			//10~15cm 停止跟随
+				}
 			}
 		}
 
@@ -126,83 +155,46 @@ uint8_t string[10] = {0};
 			}
 		}
 
-		//Mode 3: ���������� (�������̽ͷɨ��, ������ԭ��ת)
+		//Mode 3: 增强避障 (超声波 + 红外, 无舵机)
 		if(Mode == 3)
 		{
-			TIM_SetCompare1(TIM3,80);	//�����ǰ
-			delay_ms(200);
-			if(SR04_Distance()>25)
+			int dist = SR04_Distance();
+
+			// 红外近距紧急处理
+			if(IR_LEFT == 1 && IR_RIGHT == 1)
 			{
-				Forward();
+				Backward();
+				delay_ms(400);
+				RotateCW();
 				delay_ms(500);
 			}
-			if(SR04_Distance()<25)
+			else if(IR_LEFT == 1)
 			{
-				TIM_SetCompare1(TIM3,50);	//̽ͷת����
-				delay_ms(200);
-				if(SR04_Distance()>25)
-				{
-					RotateCW();				//�ҷ����ϰ�, ԭ����ת��ǰ��
-					delay_ms(700);
-				}
-				else
-				{
-					TIM_SetCompare1(TIM3,110);	//̽ͷת����
-					delay_ms(200);
-					if(SR04_Distance()>25)
-					{
-						RotateCCW();			//�����ϰ�, ԭ����ת��ǰ��
-						delay_ms(700);
-					}
-					else
-					{
-						Backward();
-						delay_ms(700);
-						RotateCW();
-						delay_ms(700);
-					}
-				}
+				RotateCW();		//左边有障碍, 右转
+				delay_ms(400);
+			}
+			else if(IR_RIGHT == 1)
+			{
+				RotateCCW();	//右边有障碍, 左转
+				delay_ms(400);
+			}
+			else if(dist < 30)
+			{
+				// 超声波检测到前方障碍
+				RotateCCW();
+				delay_ms(500);
+			}
+			else
+			{
+				Forward();
+				delay_ms(100);
 			}
 		}
 
-		//Mode 4: ����ѭ�� (��·������, �����ú�������)
-		if(Mode == 4)
+		//Mode 5: 树莓派上位机控制模式
+		if(Mode == 5)
 		{
-			if(HW_1 == 0 && HW_2 == 0 && HW_3 == 0 && HW_4 == 0)
-			{
-				Forward();
-				delay_ms(50);
-			}
-			if(HW_1 == 0 && HW_2 == 1 && HW_3 == 0 && HW_4 == 0)
-			{
-				StrafeRight();
-				delay_ms(150);
-			}
-			if(HW_1 == 1 && HW_2 == 0 && HW_3 == 0 && HW_4 == 0)
-			{
-				StrafeRight();
-				delay_ms(250);
-			}
-			if(HW_1 == 1 && HW_2 == 1 && HW_3 == 0 && HW_4 == 0)
-			{
-				StrafeRight();
-				delay_ms(300);
-			}
-			if(HW_1 == 0 && HW_2 == 0 && HW_3 == 1 && HW_4 == 0)
-			{
-				StrafeLeft();
-				delay_ms(150);
-			}
-			if(HW_1 == 0 && HW_2 == 0 && HW_3 == 0 && HW_4 == 1)
-			{
-				StrafeLeft();
-				delay_ms(250);
-			}
-			if(HW_1 == 0 && HW_2 == 0 && HW_3 == 1 && HW_4 == 1)
-			{
-				StrafeLeft();
-				delay_ms(300);
-			}
+			Protocol_Poll();  // 轮询处理来自树莓派的协议命令
 		}
 	 }
  }

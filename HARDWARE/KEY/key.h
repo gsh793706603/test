@@ -1,25 +1,19 @@
 #ifndef __KEY_H
-#define __KEY_H	 
+#define __KEY_H
 #include "sys.h"
 
+#define KEY1  GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_7)//KEY1
+#define KEY2  GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_12)//KEY2
 
+/* çº¢å¤–é¿éšœä¼ æ„Ÿå™¨ (0=æ— éšœç¢, 1=æ£€æµ‹åˆ°éšœç¢) */
+#define IR_LEFT   GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_5)//çº¢å¤– å·¦
+#define IR_RIGHT  GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_15)//çº¢å¤– å³
 
+#define KEY0_PRES 	1
+#define KEY1_PRES	  2
+#define WKUP_PRES   3
 
-
-#define KEY1  GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_7)//¶ÁÈ¡°´¼ü1
-#define KEY2  GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_12)//¶ÁÈ¡°´¼ü2
-
-#define HW_1  GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_5)//ºìÍâ1
-#define HW_2  GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_4)//ºìÍâ2
-#define HW_3  GPIO_ReadInputDataBit(GPIOB,GPIO_Pin_3)//ºìÍâ3
-#define HW_4  GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_15)//ºìÍâ4
-
-#define KEY0_PRES 	1	//KEY0°´ÏÂ
-#define KEY1_PRES	  2	//KEY1°´ÏÂ
-#define WKUP_PRES   3	//KEY_UP°´ÏÂ(¼´WK_UP/KEY_UP)
-
-
-void KEY_Init(void);//IO³õÊ¼»¯
+void KEY_Init(void);
 void TCRT5000_Init(void);
-u8 KEY_Scan(u8);  	//°´¼üÉ¨Ãèº¯Êı					    
+u8 KEY_Scan(u8);
 #endif

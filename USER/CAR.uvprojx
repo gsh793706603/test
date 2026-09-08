@@ -336,7 +336,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F10X_MD,USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\USER;..\CORE;..\STM32F10x_FWLib\inc;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\HARDWARE\LED;..\HARDWARE\TIMER;..\HARDWARE\EXTI;..\HARDWARE\KEY;..\HARDWARE\OLED;..\HARDWARE\ADC;..\HARDWARE\MOTOR</IncludePath>
+              <IncludePath>..\USER;..\CORE;..\STM32F10x_FWLib\inc;..\SYSTEM\delay;..\SYSTEM\sys;..\SYSTEM\usart;..\HARDWARE\LED;..\HARDWARE\TIMER;..\HARDWARE\EXTI;..\HARDWARE\KEY;..\HARDWARE\OLED;..\HARDWARE\ADC;..\HARDWARE\MOTOR;..\HARDWARE\PROTOCOL</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -434,6 +434,11 @@
               <FileName>motor.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\HARDWARE\MOTOR\motor.c</FilePath>
+            </File>
+            <File>
+              <FileName>protocol.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\PROTOCOL\protocol.c</FilePath>
             </File>
           </Files>
         </Group>
